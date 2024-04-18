@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        UPDATE tasks\n        SET\n            execution_chat_id = $3,\n            updated_at = $4\n        WHERE company_id = $1 AND id = $2\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Int4",
+        "Int4",
+        "Timestamptz"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "a0f126aac8236ef4c7cd1d2d5393b82dee78ae56c7a885202b0c57db0ff8d227"
+}

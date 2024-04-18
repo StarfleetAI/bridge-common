@@ -1,0 +1,102 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT *\n        FROM tasks\n        WHERE company_id = $1 AND ancestry = $2 OR ancestry LIKE $3\n        ORDER BY created_at ASC\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "company_id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 2,
+        "name": "user_id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 3,
+        "name": "agent_id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 4,
+        "name": "origin_chat_id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 5,
+        "name": "control_chat_id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 6,
+        "name": "execution_chat_id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 7,
+        "name": "title",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 8,
+        "name": "summary",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 9,
+        "name": "status",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 10,
+        "name": "ancestry",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 11,
+        "name": "ancestry_level",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 12,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 13,
+        "name": "updated_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      true,
+      true,
+      true,
+      false,
+      false,
+      false,
+      true,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "25e2bb2e76fa36eb9056b674d2f6dc4526d748fbcdeb71364a0670b86130f6d7"
+}

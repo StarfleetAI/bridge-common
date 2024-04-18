@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE chats SET model_id = $3, updated_at = $4 WHERE company_id = $1 AND id = $2",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Int4",
+        "Int4",
+        "Timestamptz"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "0249b2289eb6a41bbf1425b4f53ac7c6e32f564e1a2855e5d0d6526efaddd2a1"
+}

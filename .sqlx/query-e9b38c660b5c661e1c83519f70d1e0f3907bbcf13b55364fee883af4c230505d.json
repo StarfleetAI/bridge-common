@@ -1,0 +1,34 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT * FROM agent_abilities WHERE company_id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "company_id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "agent_id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 2,
+        "name": "ability_id",
+        "type_info": "Int4"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "e9b38c660b5c661e1c83519f70d1e0f3907bbcf13b55364fee883af4c230505d"
+}

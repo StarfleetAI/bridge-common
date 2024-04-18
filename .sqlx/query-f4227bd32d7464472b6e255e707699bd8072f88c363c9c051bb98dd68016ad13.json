@@ -1,0 +1,124 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        INSERT INTO messages (\n            company_id, chat_id, agent_id, status,\n            role, content, prompt_tokens, completion_tokens,\n            tool_calls, tool_call_id, created_at, updated_at,\n            is_self_reflection, is_internal_tool_output\n        ) VALUES (\n            $1, $2, $3, $4,\n            $5, $6, $7, $8,\n            $9, $10, $11, $11,\n            $12, $13\n        ) RETURNING *\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 1,
+        "name": "company_id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 2,
+        "name": "chat_id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 3,
+        "name": "agent_id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 4,
+        "name": "user_id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 5,
+        "name": "status",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 6,
+        "name": "role",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 7,
+        "name": "content",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 8,
+        "name": "prompt_tokens",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 9,
+        "name": "completion_tokens",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 10,
+        "name": "tool_calls",
+        "type_info": "Json"
+      },
+      {
+        "ordinal": 11,
+        "name": "tool_call_id",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 12,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 13,
+        "name": "updated_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 14,
+        "name": "is_self_reflection",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 15,
+        "name": "is_internal_tool_output",
+        "type_info": "Bool"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Int4",
+        "Int4",
+        "Text",
+        "Text",
+        "Text",
+        "Int4",
+        "Int4",
+        "Json",
+        "Text",
+        "Timestamptz",
+        "Bool",
+        "Bool"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      true,
+      true,
+      false,
+      false,
+      true,
+      true,
+      true,
+      true,
+      true,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "f4227bd32d7464472b6e255e707699bd8072f88c363c9c051bb98dd68016ad13"
+}

@@ -1,0 +1,115 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        UPDATE messages\n        SET content = $3, updated_at = $4\n        WHERE company_id = $1 AND id = $2\n        RETURNING *\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 1,
+        "name": "company_id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 2,
+        "name": "chat_id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 3,
+        "name": "agent_id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 4,
+        "name": "user_id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 5,
+        "name": "status",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 6,
+        "name": "role",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 7,
+        "name": "content",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 8,
+        "name": "prompt_tokens",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 9,
+        "name": "completion_tokens",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 10,
+        "name": "tool_calls",
+        "type_info": "Json"
+      },
+      {
+        "ordinal": 11,
+        "name": "tool_call_id",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 12,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 13,
+        "name": "updated_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 14,
+        "name": "is_self_reflection",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 15,
+        "name": "is_internal_tool_output",
+        "type_info": "Bool"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Int8",
+        "Text",
+        "Timestamptz"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      true,
+      true,
+      false,
+      false,
+      true,
+      true,
+      true,
+      true,
+      true,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "9a63212f85fd54f9be4bc6ff7947755c5809345100ac821efa15463e07d8c135"
+}

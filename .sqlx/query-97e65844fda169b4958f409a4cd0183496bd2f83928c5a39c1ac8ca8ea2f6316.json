@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE settings SET value = $1, updated_at = $2 WHERE company_id = $3",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Json",
+        "Timestamptz",
+        "Int4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "97e65844fda169b4958f409a4cd0183496bd2f83928c5a39c1ac8ca8ea2f6316"
+}

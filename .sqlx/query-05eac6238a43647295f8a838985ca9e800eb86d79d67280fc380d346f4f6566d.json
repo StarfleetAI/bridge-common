@@ -1,0 +1,34 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT * FROM agents_chats WHERE company_id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "company_id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "agent_id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 2,
+        "name": "chat_id",
+        "type_info": "Int4"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "05eac6238a43647295f8a838985ca9e800eb86d79d67280fc380d346f4f6566d"
+}

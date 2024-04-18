@@ -1,0 +1,101 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT *\n        FROM tasks\n        WHERE ancestry IS NULL\n        AND company_id = $1 AND status = $2\n        ORDER BY created_at ASC\n        LIMIT 1\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "company_id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 2,
+        "name": "user_id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 3,
+        "name": "agent_id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 4,
+        "name": "origin_chat_id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 5,
+        "name": "control_chat_id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 6,
+        "name": "execution_chat_id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 7,
+        "name": "title",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 8,
+        "name": "summary",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 9,
+        "name": "status",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 10,
+        "name": "ancestry",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 11,
+        "name": "ancestry_level",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 12,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 13,
+        "name": "updated_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      true,
+      true,
+      true,
+      false,
+      false,
+      false,
+      true,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "9356e35033d94fd61c879d89b78fc67eb8ff0b295d5874efc7ae3567b2392c5e"
+}

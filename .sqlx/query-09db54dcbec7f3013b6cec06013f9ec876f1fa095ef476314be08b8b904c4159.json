@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM tasks WHERE company_id = $1 AND (origin_chat_id = $2 OR control_chat_id = $2 OR execution_chat_id = $2)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Int4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "09db54dcbec7f3013b6cec06013f9ec876f1fa095ef476314be08b8b904c4159"
+}
