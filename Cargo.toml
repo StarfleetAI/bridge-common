@@ -15,7 +15,7 @@ bollard = "0.16.1"
 candle-core = { version = "0.4.1" }
 candle-nn = { version = "0.4.1" }
 candle-transformers = { version = "0.4.1" }
-chrono = { version = "0.4.37", features = ["serde"] }
+chrono = { version = "0.4.38", features = ["serde"] }
 fantoccini = { version = "0.19.3", default-features = false, features = ["rustls-tls"] }
 futures-util = "0.3.30"
 hf-hub = { version = "0.3.2", features = ["tokio"] }
