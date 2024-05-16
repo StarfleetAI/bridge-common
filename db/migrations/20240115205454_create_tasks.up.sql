@@ -2,13 +2,13 @@
 -- SPDX-License-Identifier: Apache-2.0
 
 CREATE TABLE tasks (
-    id SERIAL PRIMARY KEY,
-    company_id INTEGER REFERENCES companies(id) NOT NULL,
-    user_id INTEGER REFERENCES users(id) NOT NULL,
-    agent_id INTEGER REFERENCES agents(id) NOT NULL,
-    origin_chat_id INTEGER REFERENCES chats(id),
-    control_chat_id INTEGER REFERENCES chats(id),
-    execution_chat_id INTEGER REFERENCES chats(id),
+    id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
+    company_id uuid NOT NULL REFERENCES companies(id),
+    user_id uuid NOT NULL REFERENCES users(id),
+    agent_id uuid NOT NULL REFERENCES agents(id),
+    origin_chat_id uuid REFERENCES chats(id),
+    control_chat_id uuid REFERENCES chats(id),
+    execution_chat_id uuid REFERENCES chats(id),
     title TEXT NOT NULL DEFAULT '',
     summary TEXT NOT NULL DEFAULT '',
     status TEXT NOT NULL,

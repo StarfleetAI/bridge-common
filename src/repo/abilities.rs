@@ -5,6 +5,7 @@ use anyhow::Context;
 use chrono::Utc;
 use serde_json::json;
 use sqlx::{query, query_as, Executor, Postgres};
+use uuid::Uuid;
 
 use crate::{
     clients::openai::Function,
@@ -19,7 +20,7 @@ pub struct CreateParams {
 }
 
 pub struct UpdateParams {
-    pub id: i32,
+    pub id: Uuid,
     pub name: String,
     pub description: String,
     pub code: String,
@@ -33,8 +34,8 @@ pub struct UpdateParams {
 /// Returns error if there was a problem while accessing database.
 pub async fn list_for_agent<'a, E>(
     executor: E,
-    company_id: i32,
-    agent_id: i32,
+    company_id: Uuid,
+    agent_id: Uuid,
 ) -> Result<Vec<Ability>>
 where
     E: Executor<'a, Database = Postgres>,
@@ -59,7 +60,7 @@ where
 /// # Errors
 ///
 /// Returns error if there was a problem while accessing database.
-pub async fn list<'a, E>(executor: E, company_id: i32) -> Result<Vec<Ability>>
+pub async fn list<'a, E>(executor: E, company_id: Uuid) -> Result<Vec<Ability>>
 where
     E: Executor<'a, Database = Postgres>,
 {
@@ -77,7 +78,7 @@ where
 /// # Errors
 ///
 /// Returns error if there was a problem while creating ability.
-pub async fn create<'a, E>(executor: E, company_id: i32, params: CreateParams) -> Result<Ability>
+pub async fn create<'a, E>(executor: E, company_id: Uuid, params: CreateParams) -> Result<Ability>
 where
     E: Executor<'a, Database = Postgres>,
 {
@@ -104,7 +105,7 @@ where
 /// # Errors
 ///
 /// Returns error if there was a problem while accessing database.
-pub async fn update<'a, E>(executor: E, company_id: i32, params: UpdateParams) -> Result<Ability>
+pub async fn update<'a, E>(executor: E, company_id: Uuid, params: UpdateParams) -> Result<Ability>
 where
     E: Executor<'a, Database = Postgres>,
 {
@@ -133,7 +134,7 @@ where
 /// # Errors
 ///
 /// Returns error if there was a problem while deleting ability.
-pub async fn delete<'a, E>(executor: E, company_id: i32, id: i32) -> Result<()>
+pub async fn delete<'a, E>(executor: E, company_id: Uuid, id: Uuid) -> Result<()>
 where
     E: Executor<'a, Database = Postgres>,
 {

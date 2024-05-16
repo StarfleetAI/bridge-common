@@ -4,6 +4,7 @@
 use chrono::Utc;
 use serde::{Deserialize, Serialize};
 use sqlx::{query, query_as, Executor, Postgres};
+use uuid::Uuid;
 
 use crate::types::{
     pages::{Page, ShortPage},
@@ -27,7 +28,7 @@ pub struct UpdateParams {
 /// # Errors
 ///
 /// Returns error if there was a problem while creating page.
-pub async fn create<'a, E>(executor: E, company_id: i32, params: CreateParams) -> Result<Page>
+pub async fn create<'a, E>(executor: E, company_id: Uuid, params: CreateParams) -> Result<Page>
 where
     E: Executor<'a, Database = Postgres>,
 {
@@ -54,7 +55,7 @@ where
 /// # Errors
 ///
 /// Returns error if there was a problem while accessing database.
-pub async fn list<'a, E>(executor: E, company_id: i32) -> Result<Vec<ShortPage>>
+pub async fn list<'a, E>(executor: E, company_id: Uuid) -> Result<Vec<ShortPage>>
 where
     E: Executor<'a, Database = Postgres>,
 {
@@ -72,7 +73,7 @@ where
 /// # Errors
 ///
 /// Returns error if there was a problem while fetching page.
-pub async fn get<'a, E>(executor: E, company_id: i32, id: i32) -> Result<Page>
+pub async fn get<'a, E>(executor: E, company_id: Uuid, id: Uuid) -> Result<Page>
 where
     E: Executor<'a, Database = Postgres>,
 {
@@ -93,8 +94,8 @@ where
 /// Returns error if there was a problem while updating page text.
 pub async fn update<'a, E>(
     executor: E,
-    company_id: i32,
-    id: i32,
+    company_id: Uuid,
+    id: Uuid,
     data: UpdateParams,
 ) -> Result<Page>
 where
@@ -125,7 +126,7 @@ where
 /// # Errors
 ///
 /// Returns error if there was a problem while deleting page.
-pub async fn delete<'a, E>(executor: E, company_id: i32, id: i32) -> Result<()>
+pub async fn delete<'a, E>(executor: E, company_id: Uuid, id: Uuid) -> Result<()>
 where
     E: Executor<'a, Database = Postgres>,
 {

@@ -9,6 +9,7 @@ use std::{
 use anyhow::Context;
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
+use uuid::Uuid;
 
 use crate::types::Result;
 
@@ -50,16 +51,16 @@ impl From<String> for Status {
 
 #[derive(Serialize, Deserialize, Debug, Default, Clone)]
 pub struct Task {
-    pub id: i32,
-    pub company_id: i32,
-    pub user_id: i32,
-    pub agent_id: i32,
+    pub id: Uuid,
+    pub company_id: Uuid,
+    pub user_id: Uuid,
+    pub agent_id: Uuid,
     /// Chat from which this task was created.
-    pub origin_chat_id: Option<i32>,
+    pub origin_chat_id: Option<Uuid>,
     /// Chat from which this task is being controlled (between the user and the Bridge).
-    pub control_chat_id: Option<i32>,
+    pub control_chat_id: Option<Uuid>,
     /// Chat in which this task is being executed (between the Bridge and the agent).
-    pub execution_chat_id: Option<i32>,
+    pub execution_chat_id: Option<Uuid>,
     pub title: String,
     pub summary: String,
     pub status: Status,
@@ -76,7 +77,7 @@ impl Task {
     /// # Errors
     ///
     /// Returns error if there was a problem while parsing parent id.
-    pub fn parent_id(&self) -> Result<Option<i32>> {
+    pub fn parent_id(&self) -> Result<Option<Uuid>> {
         Ok(match self.ancestry {
             Some(ref ancestry) => {
                 let segment = ancestry
@@ -85,7 +86,7 @@ impl Task {
                     .context("No segments found in ancestry")?;
 
                 Some(
-                    segment.parse::<i32>().with_context(|| {
+                    segment.parse::<Uuid>().with_context(|| {
                         "Failed to parse parent id from ancestry segment {segment}"
                     })?,
                 )
@@ -99,17 +100,17 @@ impl Task {
     /// # Errors
     ///
     /// Returns error if there was a problem while parsing parent ids.
-    pub fn parent_ids(&self) -> Result<Option<Vec<i32>>> {
+    pub fn parent_ids(&self) -> Result<Option<Vec<Uuid>>> {
         Ok(match self.ancestry {
             Some(ref ancestry) => Some(
                 ancestry
                     .split('/')
                     .map(|segment| {
-                        segment.parse::<i32>().with_context(|| {
+                        segment.parse::<Uuid>().with_context(|| {
                             "Failed to parse parent id from ancestry segment {segment}"
                         })
                     })
-                    .collect::<std::result::Result<Vec<i32>, _>>()?,
+                    .collect::<std::result::Result<Vec<Uuid>, _>>()?,
             ),
             None => None,
         })
@@ -137,14 +138,14 @@ impl Task {
         Ok(root.join(dir))
     }
 
-    fn workdir_id(&self) -> Result<i32> {
+    fn workdir_id(&self) -> Result<Uuid> {
         Ok(match self.ancestry {
             Some(ref ancestry) => ancestry
                 .split('/')
                 .collect::<Vec<_>>()
                 .first()
                 .context("No segments found in ancestry")?
-                .parse::<i32>()
+                .parse::<Uuid>()
                 .context("Failed to parse workdir id")?,
             None => self.id,
         })

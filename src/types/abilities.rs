@@ -4,13 +4,14 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
+use uuid::Uuid;
 
 use crate::clients::openai::Function;
 
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
 pub struct Ability {
-    pub id: i32,
-    pub company_id: i32,
+    pub id: Uuid,
+    pub company_id: Uuid,
     pub name: String,
     pub description: String,
     pub code: String,

@@ -4,6 +4,7 @@
 use anyhow::Context;
 use chrono::Utc;
 use sqlx::{query, query_as, Executor, Postgres};
+use uuid::Uuid;
 
 use crate::types::{
     chats::{Chat, Kind},
@@ -15,7 +16,11 @@ use crate::types::{
 /// # Errors
 ///
 /// Returns error if there was a problem while accessing database.
-pub async fn list<'a, E>(executor: E, company_id: i32, is_pinned: Option<bool>) -> Result<Vec<Chat>>
+pub async fn list<'a, E>(
+    executor: E,
+    company_id: Uuid,
+    is_pinned: Option<bool>,
+) -> Result<Vec<Chat>>
 where
     E: Executor<'a, Database = Postgres>,
 {
@@ -54,7 +59,7 @@ where
 /// # Errors
 ///
 /// Returns error if there was a problem while accessing database.
-pub async fn get<'a, E>(executor: E, company_id: i32, id: i32) -> Result<Chat>
+pub async fn get<'a, E>(executor: E, company_id: Uuid, id: Uuid) -> Result<Chat>
 where
     E: Executor<'a, Database = Postgres>,
 {
@@ -73,7 +78,7 @@ where
 /// # Errors
 ///
 /// Returns error if there was a problem while accessing database.
-pub async fn delete<'a, E>(executor: E, company_id: i32, id: i32) -> Result<()>
+pub async fn delete<'a, E>(executor: E, company_id: Uuid, id: Uuid) -> Result<()>
 where
     E: Executor<'a, Database = Postgres>,
 {
@@ -94,7 +99,7 @@ where
 /// # Errors
 ///
 /// Returns error if there was a problem while creating chat.
-pub async fn create<'a, E>(executor: E, company_id: i32, kind: Kind) -> Result<Chat>
+pub async fn create<'a, E>(executor: E, company_id: Uuid, kind: Kind) -> Result<Chat>
 where
     E: Executor<'a, Database = Postgres>,
 {
@@ -116,7 +121,7 @@ where
 /// # Errors
 ///
 /// Returns error if there was a problem while accessing database or if the chat with the given ID does not exist.
-pub async fn update_title<'a, E>(executor: E, company_id: i32, id: i32, title: &str) -> Result<()>
+pub async fn update_title<'a, E>(executor: E, company_id: Uuid, id: Uuid, title: &str) -> Result<()>
 where
     E: Executor<'a, Database = Postgres>,
 {
@@ -140,7 +145,7 @@ where
 /// # Errors
 ///
 /// Returns error if the chat with the given ID does not exist.
-pub async fn toggle_is_pinned<'a, E>(executor: E, company_id: i32, id: i32) -> Result<()>
+pub async fn toggle_is_pinned<'a, E>(executor: E, company_id: Uuid, id: Uuid) -> Result<()>
 where
     E: Executor<'a, Database = Postgres>,
 {
@@ -163,9 +168,9 @@ where
 /// Return error if the chat with the given ID does not exist.
 pub async fn update_model_id<'a, E>(
     executor: E,
-    company_id: i32,
-    id: i32,
-    model_id: Option<i32>,
+    company_id: Uuid,
+    id: Uuid,
+    model_id: Option<Uuid>,
 ) -> Result<()>
 where
     E: Executor<'a, Database = Postgres>,

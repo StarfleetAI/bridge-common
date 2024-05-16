@@ -5,6 +5,7 @@ use std::collections::HashMap;
 
 use anyhow::Context;
 use sqlx::{query, query_as, Executor, Postgres};
+use uuid::Uuid;
 
 use crate::types::{agents_chats::AgentsChat, Result};
 
@@ -13,7 +14,7 @@ use crate::types::{agents_chats::AgentsChat, Result};
 /// # Errors
 ///
 /// Returns error if there was a problem while accessing database.
-pub async fn list<'a, E>(executor: E, company_id: i32) -> Result<HashMap<i32, Vec<i32>>>
+pub async fn list<'a, E>(executor: E, company_id: Uuid) -> Result<HashMap<Uuid, Vec<Uuid>>>
 where
     E: Executor<'a, Database = Postgres>,
 {
@@ -28,7 +29,7 @@ where
     .await
     .with_context(|| "Failed to fetch agents for chat")?;
 
-    let mut chat_agents: HashMap<i32, Vec<i32>> = HashMap::new();
+    let mut chat_agents: HashMap<Uuid, Vec<Uuid>> = HashMap::new();
 
     for row in rows {
         chat_agents
@@ -45,7 +46,12 @@ where
 /// # Errors
 ///
 /// Returns error if there was a problem while creating `agents_chats` record.
-pub async fn create<'a, E>(executor: E, company_id: i32, agent_id: i32, chat_id: i32) -> Result<()>
+pub async fn create<'a, E>(
+    executor: E,
+    company_id: Uuid,
+    agent_id: Uuid,
+    chat_id: Uuid,
+) -> Result<()>
 where
     E: Executor<'a, Database = Postgres>,
 {
@@ -67,7 +73,7 @@ where
 /// # Errors
 ///
 /// Returns error if there was a problem while deleting `agents_chats` records.
-pub async fn delete_for_chat<'a, E>(executor: E, company_id: i32, chat_id: i32) -> Result<()>
+pub async fn delete_for_chat<'a, E>(executor: E, company_id: Uuid, chat_id: Uuid) -> Result<()>
 where
     E: Executor<'a, Database = Postgres>,
 {

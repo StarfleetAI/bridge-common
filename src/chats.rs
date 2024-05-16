@@ -5,6 +5,7 @@ use anyhow::{anyhow, Context};
 use serde_json::Value;
 use sqlx::{Pool, Postgres};
 use tracing::{debug, error, instrument, trace, warn};
+use uuid::Uuid;
 
 use crate::{
     channel::{Channel, Event},
@@ -51,9 +52,9 @@ pub enum Error {
 pub async fn create_completion(
     pool: &Pool<Postgres>,
     channel: &Channel,
-    cid: i32,
-    uid: i32,
-    chat_id: i32,
+    cid: Uuid,
+    uid: Uuid,
+    chat_id: Uuid,
     params: CreateCompletionParams,
     model: &Model,
     api_key: &str,
@@ -106,7 +107,7 @@ pub async fn create_completion(
 
     tx.commit().await.context("Failed to commit transaction")?;
 
-    channel.emit(uid, Event::MessageCreated(&message)).await?;
+    channel.emit(uid, &Event::MessageCreated(&message)).await?;
 
     let tools = match construct_tools(abilities).await {
         Ok(tools) => tools,
@@ -148,8 +149,8 @@ pub async fn create_completion(
 async fn create_completion_sync<'a>(
     pool: &Pool<Postgres>,
     channel: &Channel,
-    cid: i32,
-    uid: i32,
+    cid: Uuid,
+    uid: Uuid,
     messages: Vec<clients::openai::Message>,
     message: &'a mut Message,
     tools: Option<Vec<Tool>>,
@@ -209,7 +210,7 @@ async fn create_completion_sync<'a>(
             return Err(err.into());
         };
 
-        if let Err(err) = channel.emit(uid, Event::MessageUpdated(&message)).await {
+        if let Err(err) = channel.emit(uid, &Event::MessageUpdated(&message)).await {
             warn!("Failed to emit `MessageUpdate` event: {}", err);
         }
     } else {
@@ -224,8 +225,8 @@ async fn create_completion_sync<'a>(
 async fn create_completion_stream<'a>(
     pool: &Pool<Postgres>,
     channel: &Channel,
-    cid: i32,
-    uid: i32,
+    cid: Uuid,
+    uid: Uuid,
     messages: Vec<clients::openai::Message>,
     message: &'a mut Message,
     tools: Option<Vec<Tool>>,
@@ -329,7 +330,7 @@ async fn create_completion_stream<'a>(
                 };
             }
 
-            if let Err(err) = channel.emit(uid, Event::MessageUpdated(&message)).await {
+            if let Err(err) = channel.emit(uid, &Event::MessageUpdated(&message)).await {
                 warn!("Failed to emit `MessageUpdate` event: {}", err);
             };
         }
@@ -370,13 +371,13 @@ pub async fn construct_tools(abilities: Vec<Ability>) -> Result<Option<Vec<Tool>
 async fn fail_message(
     pool: &Pool<Postgres>,
     channel: &Channel,
-    uid: i32,
+    uid: Uuid,
     message: &mut Message,
 ) -> Result<()> {
     repo::messages::update_status(pool, message.company_id, message.id, Status::Failed).await?;
     message.status = Status::Failed;
 
-    channel.emit(uid, Event::MessageUpdated(&message)).await?;
+    channel.emit(uid, &Event::MessageUpdated(&message)).await?;
 
     Ok(())
 }

@@ -3,6 +3,7 @@
 
 use sqlx::{Pool, Postgres};
 use tracing::warn;
+use uuid::Uuid;
 
 use crate::{
     repo,
@@ -13,7 +14,7 @@ use crate::{
 #[derive(thiserror::Error, Debug)]
 pub enum Error {
     #[error("default model `{1}` (cid: {0}) is not found in the database")]
-    DefaultModelNotFound(i32, String),
+    DefaultModelNotFound(Uuid, String),
 }
 
 /// Get model for a given chat.
@@ -26,7 +27,7 @@ pub enum Error {
 /// Returns error if default model is not found in the database.
 pub async fn get_for_chat(
     pool: &Pool<Postgres>,
-    cid: i32,
+    cid: Uuid,
     settings: &Settings,
     chat: &Chat,
 ) -> Result<Model> {
@@ -47,7 +48,7 @@ pub async fn get_for_chat(
     }
 }
 
-pub async fn get_default(pool: &Pool<Postgres>, cid: i32, settings: &Settings) -> Result<Model> {
+pub async fn get_default(pool: &Pool<Postgres>, cid: Uuid, settings: &Settings) -> Result<Model> {
     match repo::models::get_by_full_name(pool, cid, &settings.default_model).await? {
         Some(model) => Ok(model),
         None => Err(Error::DefaultModelNotFound(cid, settings.default_model.clone()).into()),

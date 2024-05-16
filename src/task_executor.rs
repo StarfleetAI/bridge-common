@@ -10,6 +10,7 @@ use serde_json::json;
 use sqlx::{Pool, Postgres};
 use tokio::fs;
 use tracing::{debug, error, info, instrument};
+use uuid::Uuid;
 
 use crate::channel::{self, Channel};
 use crate::clients::openai::{ToolCall, ToolCalls};
@@ -34,7 +35,7 @@ pub enum Error {
     #[error("no root tasks to execute")]
     NoRootTasks,
     #[error("chat #{0} is not an execution chat")]
-    NotAnExecutionChat(i32),
+    NotAnExecutionChat(Uuid),
     #[error("failed to render template: {0}")]
     TemplateRender(#[from] askama::Error),
 }
@@ -49,7 +50,7 @@ pub struct TaskExecutor<'a> {
 
 impl TaskExecutor<'_> {
     #[instrument(skip_all)]
-    pub async fn execute_root_task(&self, cid: i32) -> Result<()> {
+    pub async fn execute_root_task(&self, cid: Uuid) -> Result<()> {
         let mut task = match self.get_root_task_for_execution(cid).await {
             Ok(Some(task)) => task,
             Ok(None) => return Err(Error::NoRootTasks.into()),
@@ -57,9 +58,9 @@ impl TaskExecutor<'_> {
         };
 
         // TODO: get the uid from task author
-        let uid = 0;
+        let uid = Uuid::new_v4();
         self.channel
-            .emit(uid, channel::Event::TaskUpdated(&task))
+            .emit(uid, &channel::Event::TaskUpdated(&task))
             .await?;
 
         info!("Root task for execution: #{}. {}", task.id, task.title);
@@ -84,7 +85,7 @@ impl TaskExecutor<'_> {
 
                 let task = repo::tasks::update_status(self.pool, cid, task.id, status).await?;
                 self.channel
-                    .emit(uid, channel::Event::TaskUpdated(&task))
+                    .emit(uid, &channel::Event::TaskUpdated(&task))
                     .await?;
 
                 Ok(())
@@ -92,7 +93,7 @@ impl TaskExecutor<'_> {
             Err(err) => {
                 let task = repo::tasks::fail(self.pool, cid, task.id).await?;
                 self.channel
-                    .emit(uid, channel::Event::TaskUpdated(&task))
+                    .emit(uid, &channel::Event::TaskUpdated(&task))
                     .await?;
 
                 Err(err)
@@ -101,7 +102,7 @@ impl TaskExecutor<'_> {
     }
 
     #[instrument(skip_all)]
-    async fn get_task_execution_chat(&self, cid: i32, task: &Task) -> Result<Chat> {
+    async fn get_task_execution_chat(&self, cid: Uuid, task: &Task) -> Result<Chat> {
         if let Some(chat_id) = task.execution_chat_id {
             match repo::chats::get(self.pool, cid, chat_id).await {
                 Ok(chat) if chat.kind == Kind::Execution => Ok(chat),
@@ -118,7 +119,7 @@ impl TaskExecutor<'_> {
     }
 
     #[instrument(skip_all)]
-    async fn get_root_task_for_execution(&self, cid: i32) -> Result<Option<Task>> {
+    async fn get_root_task_for_execution(&self, cid: Uuid) -> Result<Option<Task>> {
         let mut tx = self
             .pool
             .begin()
@@ -146,7 +147,7 @@ impl TaskExecutor<'_> {
     }
 
     #[instrument(skip_all)]
-    async fn get_child_task_for_execution(&self, cid: i32, parent: &Task) -> Result<Option<Task>> {
+    async fn get_child_task_for_execution(&self, cid: Uuid, parent: &Task) -> Result<Option<Task>> {
         let mut children_tasks =
             repo::tasks::list_all_children(self.pool, cid, &parent.children_ancestry())
                 .await
@@ -171,8 +172,8 @@ impl TaskExecutor<'_> {
 
     async fn execute_children_task_tree(
         &self,
-        cid: i32,
-        uid: i32,
+        cid: Uuid,
+        uid: Uuid,
         parent: &mut Task,
     ) -> Result<()> {
         info!("Executing children tasks tree for task #{}", parent.id);
@@ -191,7 +192,7 @@ impl TaskExecutor<'_> {
             // TODO: seems counterintuitive to emit the task update here, since it was updated in the
             //       `get_child_task_for_execution` function. Consider code reorganization.
             self.channel
-                .emit(uid, channel::Event::TaskUpdated(&child))
+                .emit(uid, &channel::Event::TaskUpdated(&child))
                 .await?;
 
             match self.execute_task(cid, uid, &mut child).await {
@@ -216,7 +217,7 @@ impl TaskExecutor<'_> {
                         .await?;
 
                         self.channel
-                            .emit(uid, channel::Event::TaskUpdated(&task))
+                            .emit(uid, &channel::Event::TaskUpdated(&task))
                             .await?;
                     }
                 }
@@ -232,12 +233,12 @@ impl TaskExecutor<'_> {
         Ok(())
     }
 
-    async fn fail_parent_tasks(&self, cid: i32, uid: i32, child: &Task) -> Result<()> {
+    async fn fail_parent_tasks(&self, cid: Uuid, uid: Uuid, child: &Task) -> Result<()> {
         if let Some(parent_ids) = child.parent_ids()? {
             for parent_id in parent_ids {
                 let task = repo::tasks::fail(self.pool, cid, parent_id).await?;
                 self.channel
-                    .emit(uid, channel::Event::TaskUpdated(&task))
+                    .emit(uid, &channel::Event::TaskUpdated(&task))
                     .await?;
             }
         }
@@ -246,7 +247,7 @@ impl TaskExecutor<'_> {
     }
 
     #[instrument(skip_all)]
-    async fn execute_task(&self, cid: i32, uid: i32, task: &mut Task) -> Result<Status> {
+    async fn execute_task(&self, cid: Uuid, uid: Uuid, task: &mut Task) -> Result<Status> {
         info!("Executing task #{}: {}", task.id, task.title);
 
         let chat = self.get_task_execution_chat(cid, task).await?;
@@ -254,7 +255,7 @@ impl TaskExecutor<'_> {
         task.execution_chat_id = Some(chat.id);
 
         self.channel
-            .emit(uid, channel::Event::TaskUpdated(&task))
+            .emit(uid, &channel::Event::TaskUpdated(&task))
             .await?;
 
         loop {
@@ -316,8 +317,8 @@ impl TaskExecutor<'_> {
     #[instrument(skip_all)]
     async fn call_tools(
         &self,
-        cid: i32,
-        uid: i32,
+        cid: Uuid,
+        uid: Uuid,
         message: &Message,
         tool_calls: ToolCalls,
         task: &Task,
@@ -351,7 +352,7 @@ impl TaskExecutor<'_> {
 
     async fn sfai_wait_for_user(
         &self,
-        cid: i32,
+        cid: Uuid,
         message: &Message,
         tool_call: &ToolCall,
     ) -> Result<Option<Status>> {
@@ -375,7 +376,7 @@ impl TaskExecutor<'_> {
 
     async fn sfai_fail(
         &self,
-        cid: i32,
+        cid: Uuid,
         message: &Message,
         tool_call: &ToolCall,
     ) -> Result<Option<Status>> {
@@ -399,8 +400,8 @@ impl TaskExecutor<'_> {
 
     async fn sfai_code_interpreter(
         &self,
-        cid: i32,
-        uid: i32,
+        cid: Uuid,
+        uid: Uuid,
         message: &Message,
         task: &Task,
     ) -> Result<Option<Status>> {
@@ -427,7 +428,7 @@ impl TaskExecutor<'_> {
             .await?;
 
             self.channel
-                .emit(uid, channel::Event::MessageCreated(&out_message))
+                .emit(uid, &channel::Event::MessageCreated(&out_message))
                 .await?;
         }
 
@@ -491,10 +492,10 @@ impl TaskExecutor<'_> {
 
     async fn sfai_done(
         &self,
-        cid: i32,
-        uid: i32,
+        cid: Uuid,
+        uid: Uuid,
         message: &Message,
-        task_id: i32,
+        task_id: Uuid,
         tool_call: &ToolCall,
     ) -> Result<Option<Status>> {
         repo::messages::create(
@@ -543,10 +544,10 @@ impl TaskExecutor<'_> {
     #[instrument(skip_all)]
     async fn sfai_provide_text_result(
         &self,
-        cid: i32,
-        uid: i32,
+        cid: Uuid,
+        uid: Uuid,
         message: &Message,
-        task_id: i32,
+        task_id: Uuid,
         args: ProvideTextResultArgs,
     ) -> Result<Option<Status>> {
         let mut new_status = None;
@@ -566,7 +567,7 @@ impl TaskExecutor<'_> {
         .await?;
 
         self.channel
-            .emit(uid, channel::Event::TaskResultCreated(&task_result))
+            .emit(uid, &channel::Event::TaskResultCreated(&task_result))
             .await?;
 
         if args.is_done {
@@ -574,13 +575,13 @@ impl TaskExecutor<'_> {
         }
 
         self.channel
-            .emit(uid, channel::Event::MessageCreated(&message))
+            .emit(uid, &channel::Event::MessageCreated(&message))
             .await?;
 
         Ok(new_status)
     }
 
-    async fn complete_message(&self, cid: i32, uid: i32, message: &Message) -> Result<()> {
+    async fn complete_message(&self, cid: Uuid, uid: Uuid, message: &Message) -> Result<()> {
         repo::messages::update_status(
             self.pool,
             cid,
@@ -593,13 +594,13 @@ impl TaskExecutor<'_> {
         message.status = types::messages::Status::Completed;
 
         self.channel
-            .emit(uid, channel::Event::MessageUpdated(&message))
+            .emit(uid, &channel::Event::MessageUpdated(&message))
             .await?;
 
         Ok(())
     }
 
-    async fn fail_message(&self, cid: i32, uid: i32, message: &Message) -> Result<()> {
+    async fn fail_message(&self, cid: Uuid, uid: Uuid, message: &Message) -> Result<()> {
         repo::messages::update_status(self.pool, cid, message.id, types::messages::Status::Failed)
             .await?;
 
@@ -607,14 +608,14 @@ impl TaskExecutor<'_> {
         message.status = types::messages::Status::Failed;
 
         self.channel
-            .emit(uid, channel::Event::MessageUpdated(&message))
+            .emit(uid, &channel::Event::MessageUpdated(&message))
             .await?;
 
         Ok(())
     }
 
     #[instrument(skip_all)]
-    async fn send_to_agent(&self, cid: i32, uid: i32, chat_id: i32, task: &Task) -> Result<()> {
+    async fn send_to_agent(&self, cid: Uuid, uid: Uuid, chat_id: Uuid, task: &Task) -> Result<()> {
         let agent = repo::agents::get_for_chat(self.pool, cid, chat_id).await?;
 
         let model =
@@ -654,7 +655,7 @@ impl TaskExecutor<'_> {
     }
 
     #[instrument(skip_all)]
-    async fn self_reflect(&self, cid: i32, uid: i32, chat_id: i32, task: &Task) -> Result<()> {
+    async fn self_reflect(&self, cid: Uuid, uid: Uuid, chat_id: Uuid, task: &Task) -> Result<()> {
         let agent = repo::agents::get_for_chat(self.pool, cid, chat_id).await?;
 
         let message = SelfReflectionMessageTemplate {};
@@ -750,7 +751,7 @@ struct SystemMessageTemplate<'a> {
 struct SelfReflectionMessageTemplate {}
 
 fn execution_prelude(
-    chat_id: i32,
+    chat_id: Uuid,
     task: &Task,
     agent: &Agent,
     is_self_reflection: bool,

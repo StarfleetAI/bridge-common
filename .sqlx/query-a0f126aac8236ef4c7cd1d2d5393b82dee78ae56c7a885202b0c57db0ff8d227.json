@@ -5,9 +5,9 @@
     "columns": [],
     "parameters": {
       "Left": [
-        "Int4",
-        "Int4",
-        "Int4",
+        "Uuid",
+        "Uuid",
+        "Uuid",
         "Timestamptz"
       ]
     },

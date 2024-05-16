@@ -5,6 +5,7 @@ use std::fmt::{self, Display, Formatter};
 
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
+use uuid::Uuid;
 
 #[derive(Serialize, Deserialize, Debug, sqlx::Type, Default, PartialEq, Clone)]
 pub enum Kind {
@@ -32,9 +33,9 @@ impl From<String> for Kind {
 
 #[derive(Serialize, Deserialize, Debug, Default)]
 pub struct Chat {
-    pub id: i32,
-    pub company_id: i32,
-    pub model_id: Option<i32>,
+    pub id: Uuid,
+    pub company_id: Uuid,
+    pub model_id: Option<Uuid>,
     pub title: String,
     pub is_pinned: bool,
     pub kind: Kind,

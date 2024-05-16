@@ -3,6 +3,7 @@
 
 use async_trait::async_trait;
 use serde::Serialize;
+use uuid::Uuid;
 
 use crate::types::{chats::Chat, messages::Message, task_results::TaskResult, tasks::Task, Result};
 
@@ -19,8 +20,8 @@ pub enum Event<'a> {
 
 #[async_trait]
 pub trait Emitter {
-    // TODO: maybe use Option<i32> instead of i32
-    async fn emit<'a>(&self, user_id: i32, event: Event<'a>) -> Result<()>;
+    // TODO: maybe use Option<Uuid> instead of Uuid
+    async fn emit(&self, user_id: Uuid, event: &Event) -> Result<()>;
 }
 
 pub type Channel = Box<dyn Emitter + Send + Sync>;

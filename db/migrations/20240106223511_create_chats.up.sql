@@ -2,8 +2,8 @@
 -- SPDX-License-Identifier: Apache-2.0
 
 CREATE TABLE chats (
-    id SERIAL PRIMARY KEY,
-    company_id INTEGER REFERENCES companies(id) NOT NULL,
+    id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
+    company_id uuid NOT NULL REFERENCES companies(id),
     title TEXT NOT NULL DEFAULT '',
     created_at TIMESTAMP WITH TIME ZONE NOT NULL,
     updated_at TIMESTAMP WITH TIME ZONE NOT NULL
@@ -12,9 +12,9 @@ CREATE TABLE chats (
 CREATE INDEX index_chats_on_updated_at ON chats (company_id, updated_at DESC);
 
 CREATE TABLE agents_chats (
-    company_id INTEGER REFERENCES companies(id) NOT NULL,
-    agent_id INTEGER REFERENCES agents(id) NOT NULL,
-    chat_id INTEGER REFERENCES chats(id) NOT NULL,
+    company_id uuid NOT NULL REFERENCES companies(id),
+    agent_id uuid NOT NULL REFERENCES agents(id),
+    chat_id uuid NOT NULL REFERENCES chats(id),
 
     PRIMARY KEY (company_id, agent_id, chat_id)
 );

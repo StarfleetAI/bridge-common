@@ -2,10 +2,10 @@
 -- SPDX-License-Identifier: Apache-2.0
 
 CREATE TABLE task_results (
-    id SERIAL PRIMARY KEY,
-    company_id INTEGER REFERENCES companies(id) NOT NULL,
-    agent_id INTEGER REFERENCES agents(id) NOT NULL,
-    task_id INTEGER REFERENCES tasks(id) NOT NULL,
+    id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
+    company_id uuid NOT NULL REFERENCES companies(id),
+    agent_id uuid NOT NULL REFERENCES agents(id),
+    task_id uuid NOT NULL REFERENCES tasks(id),
     kind TEXT NOT NULL DEFAULT 'Text',
     data TEXT NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE NOT NULL,

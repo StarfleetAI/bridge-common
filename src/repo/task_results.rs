@@ -5,6 +5,7 @@ use chrono::Utc;
 use markdown::to_html;
 use serde::{Deserialize, Serialize};
 use sqlx::{query, query_as, Executor, Postgres};
+use uuid::Uuid;
 
 use crate::types::{
     task_results::{Kind, TaskResult},
@@ -13,8 +14,8 @@ use crate::types::{
 
 #[derive(Serialize, Deserialize, Debug, Default)]
 pub struct CreateParams {
-    pub agent_id: i32,
-    pub task_id: i32,
+    pub agent_id: Uuid,
+    pub task_id: Uuid,
     pub kind: Kind,
     pub data: String,
 }
@@ -24,7 +25,11 @@ pub struct CreateParams {
 /// # Errors
 ///
 /// Returns error if there was a problem while accessing database.
-pub async fn create<'a, E>(executor: E, company_id: i32, params: CreateParams) -> Result<TaskResult>
+pub async fn create<'a, E>(
+    executor: E,
+    company_id: Uuid,
+    params: CreateParams,
+) -> Result<TaskResult>
 where
     E: Executor<'a, Database = Postgres>,
 {
@@ -53,7 +58,7 @@ where
 /// # Errors
 ///
 /// Returns error if there was a problem while accessing database.
-pub async fn list<'a, E>(executor: E, company_id: i32, task_id: i32) -> Result<Vec<TaskResult>>
+pub async fn list<'a, E>(executor: E, company_id: Uuid, task_id: Uuid) -> Result<Vec<TaskResult>>
 where
     E: Executor<'a, Database = Postgres>,
 {
@@ -72,7 +77,7 @@ where
 /// # Errors
 ///
 /// Returns error if there was a problem while accessing database.
-pub async fn get_text_data<'a, E>(executor: E, company_id: i32, id: i32) -> Result<String>
+pub async fn get_text_data<'a, E>(executor: E, company_id: Uuid, id: Uuid) -> Result<String>
 where
     E: Executor<'a, Database = Postgres>,
 {
@@ -94,7 +99,7 @@ where
 /// # Errors
 ///
 /// Returns error if there was a problem while accessing database.
-pub async fn delete_for_task<'a, E>(executor: E, company_id: i32, task_id: i32) -> Result<()>
+pub async fn delete_for_task<'a, E>(executor: E, company_id: Uuid, task_id: Uuid) -> Result<()>
 where
     E: Executor<'a, Database = Postgres>,
 {

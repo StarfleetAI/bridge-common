@@ -3,6 +3,7 @@
 
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
+use uuid::Uuid;
 
 #[derive(
     Serialize, Deserialize, Debug, sqlx::Type, Default, PartialEq, Eq, Clone, Copy, Ord, PartialOrd,
@@ -24,10 +25,10 @@ impl From<String> for Kind {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct TaskResult {
-    pub id: i32,
-    pub company_id: i32,
-    pub agent_id: i32,
-    pub task_id: i32,
+    pub id: Uuid,
+    pub company_id: Uuid,
+    pub agent_id: Uuid,
+    pub task_id: Uuid,
     pub kind: Kind,
     pub data: String,
     pub created_at: DateTime<Utc>,

@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use sqlx::{query, query_as, query_scalar, Executor, Postgres};
+use uuid::Uuid;
 
 use crate::types::{agent_abilities::AgentAbility, Result};
 
@@ -10,7 +11,7 @@ use crate::types::{agent_abilities::AgentAbility, Result};
 /// # Errors
 ///
 /// Returns error if there was a problem while accessing database.
-pub async fn list<'a, E>(executor: E, company_id: i32) -> Result<Vec<AgentAbility>>
+pub async fn list<'a, E>(executor: E, company_id: Uuid) -> Result<Vec<AgentAbility>>
 where
     E: Executor<'a, Database = Postgres>,
 {
@@ -30,9 +31,9 @@ where
 /// Returns error if there was a problem while creating agent ability.
 pub async fn create<'a, E>(
     executor: E,
-    company_id: i32,
-    agent_id: i32,
-    ability_id: i32,
+    company_id: Uuid,
+    agent_id: Uuid,
+    ability_id: Uuid,
 ) -> Result<()>
 where
     E: Executor<'a, Database = Postgres>,
@@ -54,7 +55,7 @@ where
 /// # Errors
 ///
 /// Returns error if there was a problem while deleting agent ability.
-pub async fn delete_for_agent<'a, E>(executor: E, company_id: i32, agent_id: i32) -> Result<()>
+pub async fn delete_for_agent<'a, E>(executor: E, company_id: Uuid, agent_id: Uuid) -> Result<()>
 where
     E: Executor<'a, Database = Postgres>,
 {
@@ -74,7 +75,7 @@ where
 /// # Errors
 ///
 /// Returns error if there was a problem while fetching agents count for ability.
-pub async fn get_agents_count<'a, E>(executor: E, company_id: i32, ability_id: i32) -> Result<i64>
+pub async fn get_agents_count<'a, E>(executor: E, company_id: Uuid, ability_id: Uuid) -> Result<i64>
 where
     E: Executor<'a, Database = Postgres>,
 {

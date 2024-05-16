@@ -1,32 +1,32 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n        INSERT INTO messages (\n            company_id, chat_id, agent_id, status,\n            role, content, prompt_tokens, completion_tokens,\n            tool_calls, tool_call_id, created_at, updated_at,\n            is_self_reflection, is_internal_tool_output\n        )\n        SELECT * FROM unnest(\n            $1::INTEGER[], $2::INTEGER[], $3::INTEGER[], $4::TEXT[],\n            $5::TEXT[], $6::TEXT[], $7::INTEGER[], $8::INTEGER[],\n            $9::JSONB[], $10::TEXT[], $11::TIMESTAMPTZ[], $12::TIMESTAMPTZ[],\n            $13::BOOLEAN[], $14::BOOLEAN[]\n        ) RETURNING *\n        ",
+  "query": "\n        INSERT INTO messages (\n            company_id, chat_id, agent_id, status,\n            role, content, prompt_tokens, completion_tokens,\n            tool_calls, tool_call_id, created_at, updated_at,\n            is_self_reflection, is_internal_tool_output\n        )\n        SELECT * FROM unnest(\n            $1::uuid[], $2::uuid[], $3::uuid[], $4::TEXT[],\n            $5::TEXT[], $6::TEXT[], $7::INTEGER[], $8::INTEGER[],\n            $9::JSONB[], $10::TEXT[], $11::TIMESTAMPTZ[], $12::TIMESTAMPTZ[],\n            $13::BOOLEAN[], $14::BOOLEAN[]\n        ) RETURNING *\n        ",
   "describe": {
     "columns": [
       {
         "ordinal": 0,
         "name": "id",
-        "type_info": "Int8"
+        "type_info": "Uuid"
       },
       {
         "ordinal": 1,
         "name": "company_id",
-        "type_info": "Int4"
+        "type_info": "Uuid"
       },
       {
         "ordinal": 2,
         "name": "chat_id",
-        "type_info": "Int4"
+        "type_info": "Uuid"
       },
       {
         "ordinal": 3,
         "name": "agent_id",
-        "type_info": "Int4"
+        "type_info": "Uuid"
       },
       {
         "ordinal": 4,
         "name": "user_id",
-        "type_info": "Int4"
+        "type_info": "Uuid"
       },
       {
         "ordinal": 5,
@@ -86,9 +86,9 @@
     ],
     "parameters": {
       "Left": [
-        "Int4Array",
-        "Int4Array",
-        "Int4Array",
+        "UuidArray",
+        "UuidArray",
+        "UuidArray",
         "TextArray",
         "TextArray",
         "TextArray",
@@ -121,5 +121,5 @@
       false
     ]
   },
-  "hash": "11ef5034b1f8deeb911d891053b00ec49368c5bef925b643dffe97bf5e4d9206"
+  "hash": "65cf439eccb5ccbe6ea871187a62289b4d1cb270b1887405880292778dd95edd"
 }

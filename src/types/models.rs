@@ -3,6 +3,7 @@
 
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
+use uuid::Uuid;
 
 const OPENAI_API_URL: &str = "https://api.openai.com/v1/";
 const GROQ_API_URL: &str = "https://api.groq.com/openai/v1/";
@@ -29,9 +30,9 @@ impl From<String> for Provider {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Model {
     // Unique identifier of the model
-    pub id: i32,
+    pub id: Uuid,
     // Unique identifier of the company
-    pub company_id: i32,
+    pub company_id: Uuid,
     // Provider of the model
     pub provider: Provider,
     // Name of the model (e.g. `gpt-4-turbo-preview`)

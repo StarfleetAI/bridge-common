@@ -4,6 +4,7 @@
 use anyhow::{anyhow, Context};
 use chrono::Utc;
 use sqlx::{query, query_as, query_scalar, Executor, Postgres};
+use uuid::Uuid;
 
 use crate::types::{
     pagination::Pagination,
@@ -13,9 +14,9 @@ use crate::types::{
 
 #[derive(Debug, Default)]
 pub struct CreateParams<'a> {
-    pub agent_id: i32,
+    pub agent_id: Uuid,
     /// Chat from which this task was created.
-    pub origin_chat_id: Option<i32>,
+    pub origin_chat_id: Option<Uuid>,
     pub title: &'a str,
     pub summary: Option<&'a str>,
     pub status: Status,
@@ -24,10 +25,10 @@ pub struct CreateParams<'a> {
 }
 
 pub struct UpdateParams<'a> {
-    pub id: i32,
+    pub id: Uuid,
     pub title: &'a str,
     pub summary: &'a str,
-    pub agent_id: i32,
+    pub agent_id: Uuid,
 }
 
 /// Gets root task for execution.
@@ -37,7 +38,7 @@ pub struct UpdateParams<'a> {
 /// Returns error if there was a problem while accessing database.
 pub async fn get_root_for_execution<'a, E: Executor<'a, Database = Postgres>>(
     executor: E,
-    company_id: i32,
+    company_id: Uuid,
 ) -> Result<Option<Task>> {
     Ok(query_as!(
         Task,
@@ -63,7 +64,7 @@ pub async fn get_root_for_execution<'a, E: Executor<'a, Database = Postgres>>(
 /// Returns error if there was a problem while accessing database.
 pub async fn get_child_for_execution<'a, E: Executor<'a, Database = Postgres>>(
     executor: E,
-    company_id: i32,
+    company_id: Uuid,
     ancestry: &'a str,
 ) -> Result<Option<Task>> {
     Ok(query_as!(
@@ -91,7 +92,7 @@ pub async fn get_child_for_execution<'a, E: Executor<'a, Database = Postgres>>(
 /// Returns error if there was a problem while accessing database.
 pub async fn list_roots<'a, E: Executor<'a, Database = Postgres>>(
     executor: E,
-    company_id: i32,
+    company_id: Uuid,
     pagination: Pagination,
 ) -> Result<Vec<Task>> {
     if pagination.page < 1 {
@@ -128,7 +129,7 @@ pub async fn list_roots<'a, E: Executor<'a, Database = Postgres>>(
 /// Returns error if there was a problem while accessing database.
 pub async fn list_roots_by_status<'a, E: Executor<'a, Database = Postgres>>(
     executor: E,
-    company_id: i32,
+    company_id: Uuid,
     status: Status,
     pagination: Pagination,
 ) -> Result<Vec<Task>> {
@@ -167,7 +168,7 @@ pub async fn list_roots_by_status<'a, E: Executor<'a, Database = Postgres>>(
 /// Returns error if there was a problem while accessing database.
 pub async fn list_all_children<'a, E: Executor<'a, Database = Postgres>>(
     executor: E,
-    company_id: i32,
+    company_id: Uuid,
     ancestry: &'a str,
 ) -> Result<Vec<Task>> {
     let like_ancestry = format!("{ancestry}/%");
@@ -195,7 +196,7 @@ pub async fn list_all_children<'a, E: Executor<'a, Database = Postgres>>(
 /// Returns error if there was a problem while accessing database.
 pub async fn get_all_children_count<'a, E: Executor<'a, Database = Postgres>>(
     executor: E,
-    company_id: i32,
+    company_id: Uuid,
     task: &Task,
 ) -> Result<i64> {
     let ancestry = task.children_ancestry();
@@ -225,7 +226,7 @@ pub async fn get_all_children_count<'a, E: Executor<'a, Database = Postgres>>(
 /// Returns error if there was a problem while accessing database.
 pub async fn is_all_siblings_done<'a, E: Executor<'a, Database = Postgres>>(
     executor: E,
-    company_id: i32,
+    company_id: Uuid,
     task: &Task,
 ) -> Result<bool> {
     let count: i64 = query_scalar!(
@@ -251,7 +252,7 @@ pub async fn is_all_siblings_done<'a, E: Executor<'a, Database = Postgres>>(
 /// Returns error if there was a problem while accessing database.
 pub async fn list_direct_children<'a, E: Executor<'a, Database = Postgres>>(
     executor: E,
-    company_id: i32,
+    company_id: Uuid,
     task: &Task,
 ) -> Result<Vec<Task>> {
     let ancestry = task.children_ancestry();
@@ -273,7 +274,7 @@ pub async fn list_direct_children<'a, E: Executor<'a, Database = Postgres>>(
 /// Returns error if there was a problem while inserting new task.
 pub async fn create<'a, E: Executor<'a, Database = Postgres>>(
     executor: E,
-    company_id: i32,
+    company_id: Uuid,
     params: CreateParams<'a>,
 ) -> Result<Task> {
     let now = Utc::now();
@@ -322,7 +323,7 @@ pub async fn create<'a, E: Executor<'a, Database = Postgres>>(
 /// Returns error if there was a problem while updating task.
 pub async fn update<'a, E: Executor<'a, Database = Postgres>>(
     executor: E,
-    company_id: i32,
+    company_id: Uuid,
     params: UpdateParams<'a>,
 ) -> Result<Task> {
     let now = Utc::now();
@@ -358,8 +359,8 @@ pub async fn update<'a, E: Executor<'a, Database = Postgres>>(
 /// Returns error if there was a problem while updating task status.
 pub async fn update_status<'a, E: Executor<'a, Database = Postgres>>(
     executor: E,
-    company_id: i32,
-    id: i32,
+    company_id: Uuid,
+    id: Uuid,
     status: Status,
 ) -> Result<Task> {
     let now = Utc::now();
@@ -391,8 +392,8 @@ pub async fn update_status<'a, E: Executor<'a, Database = Postgres>>(
 /// Returns error if there was a problem while fetching task.
 pub async fn get_by_execution_chat_id<'a, E: Executor<'a, Database = Postgres>>(
     executor: E,
-    company_id: i32,
-    execution_chat_id: i32,
+    company_id: Uuid,
+    execution_chat_id: Uuid,
 ) -> Result<Task> {
     let task = query_as!(
         Task,
@@ -413,9 +414,9 @@ pub async fn get_by_execution_chat_id<'a, E: Executor<'a, Database = Postgres>>(
 /// Returns error if there was a problem while updating task execution chat id.
 pub async fn update_execution_chat_id<'a, E: Executor<'a, Database = Postgres>>(
     executor: E,
-    company_id: i32,
-    id: i32,
-    execution_chat_id: i32,
+    company_id: Uuid,
+    id: Uuid,
+    execution_chat_id: Uuid,
 ) -> Result<()> {
     let now = Utc::now();
     query!(
@@ -444,8 +445,8 @@ pub async fn update_execution_chat_id<'a, E: Executor<'a, Database = Postgres>>(
 /// Returns error if there was a problem while revising task.
 pub async fn revise<'a, E: Executor<'a, Database = Postgres>>(
     executor: E,
-    company_id: i32,
-    id: i32,
+    company_id: Uuid,
+    id: Uuid,
 ) -> Result<Task> {
     update_status(executor, company_id, id, Status::Draft).await
 }
@@ -457,8 +458,8 @@ pub async fn revise<'a, E: Executor<'a, Database = Postgres>>(
 /// Returns error if there was a problem while executing task.
 pub async fn execute<'a, E: Executor<'a, Database = Postgres>>(
     executor: E,
-    company_id: i32,
-    id: i32,
+    company_id: Uuid,
+    id: Uuid,
 ) -> Result<Task> {
     update_status(executor, company_id, id, Status::ToDo).await
 }
@@ -470,8 +471,8 @@ pub async fn execute<'a, E: Executor<'a, Database = Postgres>>(
 /// Returns error if there was a problem while starting task.
 pub async fn start_progress<'a, E: Executor<'a, Database = Postgres>>(
     executor: E,
-    company_id: i32,
-    id: i32,
+    company_id: Uuid,
+    id: Uuid,
 ) -> Result<Task> {
     update_status(executor, company_id, id, Status::InProgress).await
 }
@@ -483,8 +484,8 @@ pub async fn start_progress<'a, E: Executor<'a, Database = Postgres>>(
 /// Returns error if there was a problem while marking task as waiting for user input.
 pub async fn wait_for_user<'a, E: Executor<'a, Database = Postgres>>(
     executor: E,
-    company_id: i32,
-    id: i32,
+    company_id: Uuid,
+    id: Uuid,
 ) -> Result<Task> {
     update_status(executor, company_id, id, Status::WaitingForUser).await
 }
@@ -496,8 +497,8 @@ pub async fn wait_for_user<'a, E: Executor<'a, Database = Postgres>>(
 /// Returns error if there was a problem while failing task.
 pub async fn fail<'a, E: Executor<'a, Database = Postgres>>(
     executor: E,
-    company_id: i32,
-    id: i32,
+    company_id: Uuid,
+    id: Uuid,
 ) -> Result<Task> {
     update_status(executor, company_id, id, Status::Failed).await
 }
@@ -509,8 +510,8 @@ pub async fn fail<'a, E: Executor<'a, Database = Postgres>>(
 /// Returns error if there was a problem while completing task.
 pub async fn complete<'a, E: Executor<'a, Database = Postgres>>(
     executor: E,
-    company_id: i32,
-    id: i32,
+    company_id: Uuid,
+    id: Uuid,
 ) -> Result<Task> {
     update_status(executor, company_id, id, Status::Done).await
 }
@@ -522,8 +523,8 @@ pub async fn complete<'a, E: Executor<'a, Database = Postgres>>(
 /// Returns error if there was a problem while fetching task.
 pub async fn get<'a, E: Executor<'a, Database = Postgres>>(
     executor: E,
-    company_id: i32,
-    id: i32,
+    company_id: Uuid,
+    id: Uuid,
 ) -> Result<Task> {
     Ok(query_as!(
         Task,
@@ -542,8 +543,8 @@ pub async fn get<'a, E: Executor<'a, Database = Postgres>>(
 /// Returns error if there was a problem while deleting task.
 pub async fn delete<'a, E: Executor<'a, Database = Postgres>>(
     executor: E,
-    company_id: i32,
-    id: i32,
+    company_id: Uuid,
+    id: Uuid,
 ) -> Result<()> {
     query!(
         "DELETE FROM tasks WHERE company_id = $1 AND id = $2",
@@ -563,8 +564,8 @@ pub async fn delete<'a, E: Executor<'a, Database = Postgres>>(
 /// Returns error if there was a problem while deleting tasks.
 pub async fn delete_children<'a, E: Executor<'a, Database = Postgres>>(
     executor: E,
-    company_id: i32,
-    id: i32,
+    company_id: Uuid,
+    id: Uuid,
     ancestry: Option<&'a str>,
 ) -> Result<()> {
     let children_ancestry = if let Some(ancestry) = ancestry {
@@ -591,8 +592,8 @@ pub async fn delete_children<'a, E: Executor<'a, Database = Postgres>>(
 /// Returns error if there was a problem while deleting `tasks` records.
 pub async fn delete_for_chat<'a, E: Executor<'a, Database = Postgres>>(
     executor: E,
-    company_id: i32,
-    chat_id: i32,
+    company_id: Uuid,
+    chat_id: Uuid,
 ) -> Result<()> {
     query!(
         "DELETE FROM tasks WHERE company_id = $1 AND (origin_chat_id = $2 OR control_chat_id = $2 OR execution_chat_id = $2)",
@@ -632,9 +633,9 @@ where
 /// Returns error if there was a problem while assigning tasks to agent.
 pub async fn assign<'a, E: Executor<'a, Database = Postgres>>(
     executor: E,
-    company_id: i32,
-    task_id: i32,
-    agent_id: i32,
+    company_id: Uuid,
+    task_id: Uuid,
+    agent_id: Uuid,
 ) -> Result<()> {
     query!(
         "UPDATE tasks SET agent_id = $3 WHERE company_id = $1 AND id = $2",
@@ -655,7 +656,7 @@ pub async fn assign<'a, E: Executor<'a, Database = Postgres>>(
 /// Returns error if there was a problem while fetching tasks count.
 pub async fn get_total_number_by_status<'a, E: Executor<'a, Database = Postgres>>(
     executor: E,
-    company_id: i32,
+    company_id: Uuid,
     status: Status,
 ) -> Result<i32> {
     let count = query_scalar!(
@@ -667,5 +668,5 @@ pub async fn get_total_number_by_status<'a, E: Executor<'a, Database = Postgres>
     .await?
     .unwrap_or_default();
 
-    Ok(i32::try_from(count).context("Failed to convert tasks count to i32")?)
+    Ok(i32::try_from(count).context("Failed to convert tasks count to Uuid")?)
 }

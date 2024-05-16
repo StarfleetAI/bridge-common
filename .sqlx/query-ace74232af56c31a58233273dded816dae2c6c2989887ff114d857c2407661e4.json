@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n        SELECT agents.*\n        FROM agents\n        INNER JOIN agents_chats ON agents.id = agents_chats.agent_id\n        WHERE agents.company_id = $1 AND agents_chats.chat_id = $2\n        LIMIT 1\n        ",
+  "query": "SELECT * FROM agents WHERE company_id = $1 AND id_int = $2 LIMIT 1",
   "describe": {
     "columns": [
       {
@@ -67,7 +67,7 @@
     "parameters": {
       "Left": [
         "Uuid",
-        "Uuid"
+        "Int4"
       ]
     },
     "nullable": [
@@ -85,5 +85,5 @@
       true
     ]
   },
-  "hash": "14902d4fe07609357ae6ff772470c3f779c0ff559909098d7c2da2185898959b"
+  "hash": "ace74232af56c31a58233273dded816dae2c6c2989887ff114d857c2407661e4"
 }

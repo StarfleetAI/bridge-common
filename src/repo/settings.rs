@@ -1,6 +1,7 @@
 use chrono::Utc;
 use serde_json::Value;
 use sqlx::{query, query_as, Executor, Postgres};
+use uuid::Uuid;
 
 use crate::{settings::Settings, types::Result};
 
@@ -13,7 +14,7 @@ struct SettingsRow {
 /// # Errors
 ///
 /// Returns error if there was a problem while fetching settings.
-pub async fn get<'a, E>(executor: E, company_id: i32) -> Result<Settings>
+pub async fn get<'a, E>(executor: E, company_id: Uuid) -> Result<Settings>
 where
     E: Executor<'a, Database = Postgres> + std::marker::Copy,
 {
@@ -40,7 +41,7 @@ where
 /// # Errors
 ///
 /// Returns error if there was a problem while inserting settings.
-pub async fn insert<'a, E>(executor: E, company_id: i32, settings: &Settings) -> Result<()>
+pub async fn insert<'a, E>(executor: E, company_id: Uuid, settings: &Settings) -> Result<()>
 where
     E: Executor<'a, Database = Postgres>,
 {
@@ -62,7 +63,7 @@ where
 /// # Errors
 ///
 /// Returns error if there was a problem while updating settings.
-pub async fn update<'a, E>(executor: E, company_id: i32, settings: &Settings) -> Result<()>
+pub async fn update<'a, E>(executor: E, company_id: Uuid, settings: &Settings) -> Result<()>
 where
     E: Executor<'a, Database = Postgres>,
 {

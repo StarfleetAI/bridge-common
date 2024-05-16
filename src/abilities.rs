@@ -8,6 +8,7 @@ use askama::Template;
 use sqlx::{Pool, Postgres};
 use tokio::{fs, spawn};
 use tracing::{debug, trace};
+use uuid::Uuid;
 
 use crate::{
     channel::Channel,
@@ -91,8 +92,8 @@ pub fn preprocess_code(code: &str) -> String {
 pub async fn execute_for_message(
     pool: &Pool<Postgres>,
     channel: &Channel,
-    cid: i32,
-    uid: i32,
+    cid: Uuid,
+    uid: Uuid,
     workdir_root: &PathBuf,
     message: &Message,
 ) -> Result<()> {
@@ -146,7 +147,10 @@ pub async fn execute_for_message(
 
         // Emit event
         channel
-            .emit(uid, crate::channel::Event::MessageCreated(&results_message))
+            .emit(
+                uid,
+                &crate::channel::Event::MessageCreated(&results_message),
+            )
             .await?;
     }
 

@@ -2,8 +2,8 @@
 -- SPDX-License-Identifier: Apache-2.0
 
 CREATE TABLE abilities (
-    id SERIAL PRIMARY KEY,
-    company_id INTEGER REFERENCES companies(id) NOT NULL,
+    id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
+    company_id uuid NOT NULL REFERENCES companies(id),
     name TEXT NOT NULL,
     description TEXT NOT NULL DEFAULT '',
     code TEXT NOT NULL DEFAULT '',

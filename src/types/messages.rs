@@ -7,6 +7,7 @@ use chrono::{DateTime, Utc};
 use markdown::to_html;
 use serde::{Deserialize, Serialize, Serializer};
 use serde_json::Value;
+use uuid::Uuid;
 
 use crate::clients::openai::ToolCalls;
 
@@ -68,11 +69,11 @@ impl From<String> for Status {
 
 #[derive(Serialize, Deserialize, Debug, Clone, Default, sqlx::FromRow)]
 pub struct Message {
-    pub id: i64,
-    pub company_id: i32,
-    pub chat_id: i32,
-    pub agent_id: Option<i32>,
-    pub user_id: Option<i32>,
+    pub id: Uuid,
+    pub company_id: Uuid,
+    pub chat_id: Uuid,
+    pub agent_id: Option<Uuid>,
+    pub user_id: Option<Uuid>,
     pub status: Status,
     pub role: Role,
     #[serde(serialize_with = "serialize_content")]

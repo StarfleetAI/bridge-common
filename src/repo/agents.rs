@@ -3,6 +3,7 @@
 
 use chrono::Utc;
 use sqlx::{query, query_as, Executor, Postgres};
+use uuid::Uuid;
 
 use crate::types::{agents::Agent, Result};
 
@@ -15,7 +16,7 @@ pub struct CreateParams {
 }
 
 pub struct UpdateParams {
-    pub id: i32,
+    pub id: Uuid,
     pub name: String,
     pub description: String,
     pub system_message: String,
@@ -28,7 +29,7 @@ pub struct UpdateParams {
 /// # Errors
 ///
 /// Returns error if there was a problem while accessing database.
-pub async fn list<'a, E>(executor: E, company_id: i32) -> Result<Vec<Agent>>
+pub async fn list<'a, E>(executor: E, company_id: Uuid) -> Result<Vec<Agent>>
 where
     E: Executor<'a, Database = Postgres>,
 {
@@ -46,7 +47,7 @@ where
 /// # Errors
 ///
 /// Returns error if there was a problem while accessing database.
-pub async fn list_enabled<'a, E>(executor: E, company_id: i32) -> Result<Vec<Agent>>
+pub async fn list_enabled<'a, E>(executor: E, company_id: Uuid) -> Result<Vec<Agent>>
 where
     E: Executor<'a, Database = Postgres>,
 {
@@ -64,7 +65,7 @@ where
 /// # Errors
 ///
 /// Returns error if there was a problem while accessing database.
-pub async fn get<'a, E>(executor: E, company_id: i32, id: i32) -> Result<Agent>
+pub async fn get<'a, E>(executor: E, company_id: Uuid, id: Uuid) -> Result<Agent>
 where
     E: Executor<'a, Database = Postgres>,
 {
@@ -78,12 +79,31 @@ where
     .await?)
 }
 
+/// Get agent by id_int.
+///
+/// # Errors
+///
+/// Returns error if there was a problem while accessing database.
+pub async fn get_by_id_int<'a, E>(executor: E, company_id: Uuid, id_int: i32) -> Result<Agent>
+where
+    E: Executor<'a, Database = Postgres>,
+{
+    Ok(query_as!(
+        Agent,
+        "SELECT * FROM agents WHERE company_id = $1 AND id_int = $2 LIMIT 1",
+        company_id,
+        id_int
+    )
+    .fetch_one(executor)
+    .await?)
+}
+
 /// Get agent by chat id.
 ///
 /// # Errors
 ///
 /// Returns error if there was a problem while accessing database.
-pub async fn get_for_chat<'a, E>(executor: E, company_id: i32, chat_id: i32) -> Result<Agent>
+pub async fn get_for_chat<'a, E>(executor: E, company_id: Uuid, chat_id: Uuid) -> Result<Agent>
 where
     E: Executor<'a, Database = Postgres>,
 {
@@ -108,7 +128,7 @@ where
 /// # Errors
 ///
 /// Returns error if there was a problem while accessing database.
-pub async fn create<'a, E>(executor: E, company_id: i32, params: CreateParams) -> Result<Agent>
+pub async fn create<'a, E>(executor: E, company_id: Uuid, params: CreateParams) -> Result<Agent>
 where
     E: Executor<'a, Database = Postgres>,
 {
@@ -141,7 +161,7 @@ where
 /// # Errors
 ///
 /// Returns error if there was a problem while accessing database.
-pub async fn update<'a, E>(executor: E, company_id: i32, params: UpdateParams) -> Result<Agent>
+pub async fn update<'a, E>(executor: E, company_id: Uuid, params: UpdateParams) -> Result<Agent>
 where
     E: Executor<'a, Database = Postgres>,
 {
@@ -178,8 +198,8 @@ where
 /// Returns error if any error occurs while accessing database.
 pub async fn update_is_enabled<'a, E>(
     executor: E,
-    company_id: i32,
-    id: i32,
+    company_id: Uuid,
+    id: Uuid,
     is_enabled: bool,
 ) -> Result<()>
 where
@@ -202,7 +222,7 @@ where
 /// # Errors
 ///
 /// Returns error if there was a problem while accessing database.
-pub async fn delete<'a, E>(executor: E, company_id: i32, id: i32) -> Result<()>
+pub async fn delete<'a, E>(executor: E, company_id: Uuid, id: Uuid) -> Result<()>
 where
     E: Executor<'a, Database = Postgres>,
 {

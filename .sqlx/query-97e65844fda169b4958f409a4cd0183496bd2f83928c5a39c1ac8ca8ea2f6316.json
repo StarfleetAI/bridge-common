@@ -7,7 +7,7 @@
       "Left": [
         "Json",
         "Timestamptz",
-        "Int4"
+        "Uuid"
       ]
     },
     "nullable": []

@@ -2,11 +2,11 @@
 -- SPDX-License-Identifier: Apache-2.0
 
 CREATE TABLE messages (
-    id BIGSERIAL PRIMARY KEY,
-    company_id INTEGER REFERENCES companies(id) NOT NULL,
-    chat_id INTEGER REFERENCES chats(id) NOT NULL,
-    agent_id INTEGER REFERENCES agents(id),
-    user_id INTEGER REFERENCES users(id),
+    id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
+    company_id uuid NOT NULL REFERENCES companies(id),
+    chat_id uuid NOT NULL REFERENCES chats(id),
+    agent_id uuid REFERENCES agents(id),
+    user_id uuid REFERENCES users(id),
     status TEXT NOT NULL,
     role TEXT NOT NULL,
     content TEXT,

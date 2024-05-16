@@ -6,6 +6,7 @@ use chrono::Utc;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use sqlx::{query, query_as, query_scalar, Executor, Postgres};
+use uuid::Uuid;
 
 use crate::messages::Error;
 use crate::types::{
@@ -19,8 +20,8 @@ pub struct RawContent {
 
 #[derive(Serialize, Deserialize, Debug, Default)]
 pub struct CreateParams {
-    pub chat_id: i32,
-    pub agent_id: Option<i32>,
+    pub chat_id: Uuid,
+    pub agent_id: Option<Uuid>,
     pub status: Status,
     pub role: Role,
     pub content: Option<String>,
@@ -34,12 +35,12 @@ pub struct CreateParams {
 
 #[derive(Debug, Default)]
 pub struct ListParams {
-    pub chat_id: i32,
+    pub chat_id: Uuid,
 }
 
 #[derive(Debug, Default)]
 pub struct UpdateWithCompletionResultParams {
-    pub id: i64,
+    pub id: Uuid,
     pub status: Status,
     pub content: Option<String>,
     pub prompt_tokens: Option<i32>,
@@ -52,7 +53,7 @@ pub struct UpdateWithCompletionResultParams {
 /// # Errors
 ///
 /// Returns error if there was a problem while accessing database.
-pub async fn list<'a, E>(executor: E, company_id: i32, params: ListParams) -> Result<Vec<Message>>
+pub async fn list<'a, E>(executor: E, company_id: Uuid, params: ListParams) -> Result<Vec<Message>>
 where
     E: Executor<'a, Database = Postgres>,
 {
@@ -78,7 +79,7 @@ where
 /// # Errors
 ///
 /// Returns error if there was a problem while creating message.
-pub async fn create<'a, E>(executor: E, company_id: i32, params: CreateParams) -> Result<Message>
+pub async fn create<'a, E>(executor: E, company_id: Uuid, params: CreateParams) -> Result<Message>
 where
     E: Executor<'a, Database = Postgres>,
 {
@@ -123,7 +124,7 @@ where
 /// Returns error if there was a problem while creating message.
 pub async fn create_multiple<'a, E>(
     executor: E,
-    company_id: i32,
+    company_id: Uuid,
     params: Vec<CreateParams>,
 ) -> Result<Vec<Message>>
 where
@@ -170,7 +171,7 @@ where
             is_self_reflection, is_internal_tool_output
         )
         SELECT * FROM unnest(
-            $1::INTEGER[], $2::INTEGER[], $3::INTEGER[], $4::TEXT[],
+            $1::uuid[], $2::uuid[], $3::uuid[], $4::TEXT[],
             $5::TEXT[], $6::TEXT[], $7::INTEGER[], $8::INTEGER[],
             $9::JSONB[], $10::TEXT[], $11::TIMESTAMPTZ[], $12::TIMESTAMPTZ[],
             $13::BOOLEAN[], $14::BOOLEAN[]
@@ -178,7 +179,7 @@ where
         "#,
         &company_ids,
         &chat_ids,
-        &agent_ids as &[Option<i32>],
+        &agent_ids as &[Option<Uuid>],
         &statuses,
         &roles,
         &contents as &[Option<String>],
@@ -200,7 +201,7 @@ where
 /// # Errors
 ///
 /// Returns error if there was a problem while fetching message.
-pub async fn get<'a, E>(executor: E, company_id: i32, id: i64) -> Result<Message>
+pub async fn get<'a, E>(executor: E, company_id: Uuid, id: Uuid) -> Result<Message>
 where
     E: Executor<'a, Database = Postgres>,
 {
@@ -219,16 +220,17 @@ where
 /// # Errors
 ///
 /// Returns error if there was a problem while fetching last message id.
+// TODO: DO SOMETHING HERE
 pub async fn get_last_message_id<'a, E>(
     executor: E,
-    company_id: i32,
-    chat_id: i32,
-) -> Result<Option<i64>>
+    company_id: Uuid,
+    chat_id: Uuid,
+) -> Result<Uuid>
 where
     E: Executor<'a, Database = Postgres>,
 {
     Ok(query_scalar!(
-        "SELECT MAX(id) FROM messages WHERE company_id = $1 AND chat_id = $2",
+        "SELECT id FROM messages WHERE company_id = $1 AND chat_id = $2 ORDER BY updated_at DESC LIMIT 1",
         company_id,
         chat_id
     )
@@ -243,8 +245,8 @@ where
 /// Returns error if there was a problem while fetching last message.
 pub async fn get_last_message<'a, E>(
     executor: E,
-    company_id: i32,
-    chat_id: i32,
+    company_id: Uuid,
+    chat_id: Uuid,
 ) -> Result<Option<Message>>
 where
     E: Executor<'a, Database = Postgres>,
@@ -272,8 +274,8 @@ where
 /// Returns error if there was a problem while counting of messages.
 pub async fn get_execution_steps_count<'a, E>(
     executor: E,
-    company_id: i32,
-    chat_id: i32,
+    company_id: Uuid,
+    chat_id: Uuid,
 ) -> Result<i64>
 where
     E: Executor<'a, Database = Postgres>,
@@ -302,8 +304,8 @@ where
 /// Returns error if there was a problem while fetching last non self-reflection message.
 pub async fn get_last_non_self_reflection_message<'a, E>(
     executor: E,
-    company_id: i32,
-    chat_id: i32,
+    company_id: Uuid,
+    chat_id: Uuid,
 ) -> Result<Option<Message>>
 where
     E: Executor<'a, Database = Postgres>,
@@ -334,8 +336,8 @@ where
 /// Returns error if there was a problem while updating message status.
 pub async fn update_status<'a, E>(
     executor: E,
-    company_id: i32,
-    id: i64,
+    company_id: Uuid,
+    id: Uuid,
     status: Status,
 ) -> Result<()>
 where
@@ -360,8 +362,8 @@ where
 /// Returns error if there was a problem while updating message tool call id.
 pub async fn update_tool_call_id<'a, E>(
     executor: E,
-    company_id: i32,
-    id: i64,
+    company_id: Uuid,
+    id: Uuid,
     tool_call_id: &str,
 ) -> Result<Message>
 where
@@ -393,7 +395,7 @@ where
 /// Returns error if there was a problem while updating assistant message.
 pub async fn update_with_completion_result<'a, E>(
     executor: E,
-    company_id: i32,
+    company_id: Uuid,
     params: UpdateWithCompletionResultParams,
 ) -> Result<Message>
 where
@@ -433,7 +435,7 @@ where
 /// # Errors
 ///
 /// Returns error if there was a problem while deleting message.
-pub async fn delete<'a, E>(executor: E, company_id: i32, id: i64) -> Result<()>
+pub async fn delete<'a, E>(executor: E, company_id: Uuid, id: Uuid) -> Result<()>
 where
     E: Executor<'a, Database = Postgres>,
 {
@@ -455,8 +457,8 @@ where
 /// Returns error if there was a problem while updating message content.
 pub async fn update_message_content<'a, E>(
     executor: E,
-    company_id: i32,
-    id: i64,
+    company_id: Uuid,
+    id: Uuid,
     content: &str,
 ) -> Result<Message>
 where
@@ -511,7 +513,7 @@ where
 /// # Errors
 ///
 /// Returns error if there was a problem while deleting messages.
-pub async fn delete_for_chat<'a, E>(executor: E, company_id: i32, chat_id: i32) -> Result<()>
+pub async fn delete_for_chat<'a, E>(executor: E, company_id: Uuid, chat_id: Uuid) -> Result<()>
 where
     E: Executor<'a, Database = Postgres>,
 {
@@ -533,7 +535,7 @@ where
 /// Returns error if there was a problem while creating message.
 pub async fn create_tool_call_denied<'a, E>(
     executor: E,
-    company_id: i32,
+    company_id: Uuid,
     message: &Message,
 ) -> Result<Vec<Message>>
 where

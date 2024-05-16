@@ -7,6 +7,7 @@ use serde::Deserialize;
 use serde_json::json;
 use sqlx::{Pool, Postgres};
 use tracing::info;
+use uuid::Uuid;
 
 use crate::channel::{self, Channel};
 use crate::chats::construct_tools;
@@ -58,7 +59,7 @@ pub struct TaskPlanner<'a> {
     pool: &'a Pool<Postgres>,
     settings: &'a Settings,
     channel: &'a Channel,
-    user_id: i32,
+    user_id: Uuid,
     user_agent: &'a str,
 }
 
@@ -99,7 +100,7 @@ impl<'a> TaskPlanner<'a> {
         pool: &'a Pool<Postgres>,
         channel: &'a Channel,
         settings: &'a Settings,
-        user_id: i32,
+        user_id: Uuid,
         user_agent: &'a str,
     ) -> Self {
         Self {
@@ -170,11 +171,15 @@ impl<'a> TaskPlanner<'a> {
         }
 
         if plan.tasks.len() == 1 {
-            task.agent_id = plan.tasks[0].agent_id;
+            let agent =
+                repo::agents::get_by_id_int(self.pool, task.company_id, plan.tasks[0].agent_id)
+                    .await?;
+
+            task.agent_id = agent.id;
             repo::tasks::assign(self.pool, task.company_id, task.id, task.agent_id).await?;
 
             self.channel
-                .emit(self.user_id, channel::Event::TaskUpdated(&task))
+                .emit(self.user_id, &channel::Event::TaskUpdated(&task))
                 .await?;
 
             return Ok(());
@@ -193,13 +198,16 @@ impl<'a> TaskPlanner<'a> {
         }
 
         for sub_task in plan.tasks {
+            let agent =
+                repo::agents::get_by_id_int(self.pool, task.company_id, sub_task.agent_id).await?;
+
             let mut task = repo::tasks::create(
                 self.pool,
                 task.company_id,
                 CreateParams {
                     title: &sub_task.title,
                     summary: Some(&sub_task.summary),
-                    agent_id: sub_task.agent_id,
+                    agent_id: agent.id,
                     ancestry: Some(&task.children_ancestry()),
                     ..Default::default()
                 },
@@ -207,7 +215,7 @@ impl<'a> TaskPlanner<'a> {
             .await?;
 
             self.channel
-                .emit(self.user_id, channel::Event::TaskCreated(&task))
+                .emit(self.user_id, &channel::Event::TaskCreated(&task))
                 .await?;
 
             // Plan sub-tasks

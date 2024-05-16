@@ -4,6 +4,7 @@
 use anyhow::Context;
 use sqlx::{query_as, Executor, Postgres};
 use tracing::{instrument, trace};
+use uuid::Uuid;
 
 use crate::types::{models::Model, Result};
 
@@ -14,7 +15,7 @@ use crate::types::{models::Model, Result};
 /// Returns error if there was a problem while fetching model.
 // TODO: filter results by company_id
 #[instrument(skip(executor))]
-pub async fn get<'a, E>(executor: E, company_id: i32, id: i32) -> Result<Model>
+pub async fn get<'a, E>(executor: E, company_id: Uuid, id: Uuid) -> Result<Model>
 where
     E: Executor<'a, Database = Postgres>,
 {
@@ -39,7 +40,7 @@ where
 #[instrument(skip(executor))]
 pub async fn get_by_full_name<'a, E>(
     executor: E,
-    company_id: i32,
+    company_id: Uuid,
     full_name: &str,
 ) -> Result<Option<Model>>
 where
@@ -65,7 +66,7 @@ where
 ///
 /// Returns error if there was a problem while fetching models.
 #[instrument(skip(executor))]
-pub async fn list<'a, E>(executor: E, company_id: i32) -> Result<Vec<Model>>
+pub async fn list<'a, E>(executor: E, company_id: Uuid) -> Result<Vec<Model>>
 where
     E: Executor<'a, Database = Postgres>,
 {
